@@ -121,6 +121,11 @@ app.post("/api/data-packet", (req, res) => {
     data: { whatsapp, sms, email }
   });
 });
+app.post("/test",async(res,seq)=>{
+  console.log("======== INCOMING REQUEST ========");
+  console.log("Body:", JSON.stringify(req.body, null, 2));
+  console.log("==================================");
+});
 
 
 app.post("/api/feedback-channels", async (req, res) => {
