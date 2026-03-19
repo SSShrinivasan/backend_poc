@@ -51,7 +51,21 @@ const feedbackSchema = new mongoose.Schema({
   reward: {
     enabled: Boolean,
     points: Number
-  }
+  },
+  whatsappNumber: {
+  type: String,
+  match: [/^[0-9]{10,15}$/, "Invalid WhatsApp number"]
+},
+phoneNumber: {
+  type: String,
+  match: [/^[0-9]{10,15}$/, "Invalid phone number"]
+},
+email: {
+  type: String,
+  lowercase: true,
+  trim: true,
+  match: [/^\S+@\S+\.\S+$/, "Invalid email"]
+}
 
 }, { timestamps: true });
 const Feedback = mongoose.model("Feedback", feedbackSchema);
@@ -285,6 +299,48 @@ app.post("/feedback", async (req, res) => {
   } catch (err) {
     console.error("Feedback save error:", err);
     res.status(500).json({ error: err.message });
+  }
+});
+app.post("/whatsapp", async (req, res) => {
+  try {
+    console.log("Incoming:", req.body);
+
+    const {
+      whatsappNumber,
+      phoneNumber,
+      email,
+      message
+    } = req.body;
+
+    // Basic validation
+    if (!whatsappNumber || !message) {
+      return res.status(400).json({
+        message: "WhatsApp number and message are required"
+      });
+    }
+
+    // Save separately (optional)
+    const newEntry = new Feedback({
+      whatsappNumber,
+      phoneNumber,
+      email,
+      feedbackQuestion: message // reuse field OR create new schema later
+    });
+
+    const savedData = await newEntry.save();
+
+    res.status(200).json({
+      message: "WhatsApp request received",
+      data: savedData
+    });
+
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      message: "Error processing WhatsApp request",
+      error: error.message
+    });
   }
 });
 
